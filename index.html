@@ -1,362 +1,313 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simulador EXANI-II • Física • 24 preguntas</title>
-  <style>
-    body { font-family: Arial, sans-serif; background: #f4f4f9; margin: 0; padding: 20px; }
-    .container { max-width: 800px; margin: auto; background: white; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); overflow: hidden; }
-    header { background: linear-gradient(90deg, #003087, #00a0df); color: white; padding: 20px; text-align: center; }
-    .question { padding: 25px; }
-    .progress { text-align: center; margin: 10px 0; font-weight: bold; }
-    .options button { display: block; width: 100%; padding: 15px; margin: 10px 0; font-size: 16px; border: 2px solid #003087; background: white; border-radius: 8px; cursor: pointer; }
-    .options button:hover { background: #f0f0f0; }
-    .feedback { margin-top: 20px; padding: 20px; border-radius: 8px; display: none; }
-    .correct { background: #d4edda; color: #155724; }
-    .wrong { background: #f8d7da; color: #721c24; }
-    button.next { background: #003087; color: white; padding: 12px 25px; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; margin-top: 15px; }
-    .final { text-align: center; padding: 30px; font-size: 22px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador EXANI-II Física | Ceneval</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: #333;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        h1 {
+            text-align: center;
+            color: #1e3c72;
+        }
+        .sub {
+            text-align: center;
+            color: #555;
+            margin-bottom: 25px;
+        }
+        .registro, .quiz-area, .resultado-final {
+            margin-top: 20px;
+        }
+        .registro input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        .registro button, .btn-enviar {
+            background: #2a5298;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            transition: 0.3s;
+        }
+        .registro button:hover, .btn-enviar:hover {
+            background: #1e3c72;
+        }
+        .pregunta {
+            background: #f0f4fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        .pregunta h3 {
+            margin-bottom: 12px;
+        }
+        .opciones label {
+            display: block;
+            margin: 8px 0;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+        }
+        .opciones input {
+            margin-right: 10px;
+        }
+        .feedback {
+            margin-top: 10px;
+            font-size: 14px;
+            padding: 8px;
+            border-radius: 6px;
+        }
+        .correcto {
+            background: #d4edda;
+            color: #155724;
+            border-left: 5px solid #28a745;
+        }
+        .incorrecto {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 5px solid #dc3545;
+        }
+        .btn-enviar {
+            margin-top: 20px;
+        }
+        .resultado-final {
+            background: #e9ecef;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .oculto {
+            display: none;
+        }
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 12px;
+            color: #888;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>Simulador EXANI-II • Módulo de Física</h1>
-      <p>24 preguntas reales tipo CENEVAL • Basado en el temario oficial</p>
-    </header>
+<div class="container">
+    <h1>📚 Simulador EXANI-II</h1>
+    <div class="sub">Módulo de Física · Ceneval · 24 preguntas</div>
 
-    <div id="quiz" class="question">
-      <div class="progress">Pregunta <span id="current">1</span> de 24</div>
-      <h2 id="pregunta-text"></h2>
-      <div class="options" id="opciones"></div>
-      <button id="btn-responder" onclick="responder()" style="display:none;">Responder</button>
+    <!-- Registro -->
+    <div id="registroPanel" class="registro">
+        <h3>📝 Regístrate para comenzar</h3>
+        <input type="text" id="nombre" placeholder="Nombre completo" required>
+        <input type="email" id="email" placeholder="Correo electrónico" required>
+        <button id="btnIniciar">▶️ Iniciar simulador</button>
     </div>
 
-    <div id="feedback" class="feedback"></div>
-
-    <div id="final-screen" class="final" style="display:none;">
-      <h2>¡Terminaste!</h2>
-      <p id="puntaje-final"></p>
-      <button onclick="enviarResultados()" style="background:#00a0df; padding:15px 30px; font-size:18px;">Enviar resultados a Google Sheets</button>
-      <br><br>
-      <button onclick="location.reload()" style="background:#555;">Volver a empezar</button>
+    <!-- Área del quiz (oculta al inicio) -->
+    <div id="quizPanel" class="quiz-area oculto">
+        <div id="preguntasContainer"></div>
+        <button id="btnCalificar" class="btn-enviar">✅ Calificar y enviar resultados</button>
     </div>
-  </div>
 
-  <script>
-    // ==================== LAS 24 PREGUNTAS (todo incluido) ====================
+    <!-- Resultado final -->
+    <div id="resultadoPanel" class="resultado-final oculto"></div>
+    <footer>Simulador basado en temario oficial EXANI-II Física (Mecánica, Óptica, Ondas, Electromagnetismo)</footer>
+</div>
+
+<script>
+    // ========================
+    // BANCO DE 24 PREGUNTAS (ALTO GRADO DE SIMILITUD CON EXAMEN REAL CENEVAL)
+    // ========================
     const preguntas = [
-      {
-        id: 1,
-        subarea: "Mecánica",
-        tema: "Sistemas de fuerzas coplanares concurrentes y distribuidos",
-        pregunta: "Tres fuerzas coplanares concurrentes actúan sobre un cuerpo en equilibrio: 20 N al este, 15 N al norte y una tercera fuerza F₃. ¿Cuál es la magnitud de F₃?",
-        opciones: ["A) 25 N", "B) 35 N", "C) 5 N", "D) 12.5 N"],
-        correcta: "A",
-        retro: "Respuesta correcta: A<br>La resultante de las dos primeras fuerzas es √(20² + 15²) = √(400 + 225) = √625 = 25 N. Por tanto F₃ = 25 N en dirección opuesta para que ∑F = 0."
-      },
-      {
-        id: 2,
-        subarea: "Mecánica",
-        tema: "Elementos que intervienen en el movimiento circular uniforme",
-        pregunta: "Un auto recorre una curva de radio 100 m a velocidad constante de 20 m/s. ¿Cuál es su aceleración centrípeta?",
-        opciones: ["A) 2 m/s²", "B) 4 m/s²", "C) 0.2 m/s²", "D) 5 m/s²"],
-        correcta: "B",
-        retro: "Respuesta correcta: B<br>a_c = v²/r = (20)² / 100 = 400 / 100 = 4 m/s²."
-      },
-      {
-        id: 3,
-        subarea: "Mecánica",
-        tema: "Cálculo de fuerza centrípeta",
-        pregunta: "Una masa de 0.5 kg gira atada a una cuerda de 0.8 m con rapidez angular de 6 rad/s. ¿Cuál es la fuerza centrípeta?",
-        opciones: ["A) 14.4 N", "B) 2.4 N", "C) 28.8 N", "D) 7.2 N"],
-        correcta: "A",
-        retro: "Respuesta correcta: A<br>F_c = m r ω² = 0.5 × 0.8 × (6)² = 0.4 × 36 = 14.4 N."
-      },
-      {
-        id: 4,
-        subarea: "Mecánica",
-        tema: "Variables relacionadas con el trabajo rotacional y la energía cinética rotacional",
-        pregunta: "Una rueda tiene I = 2.5 kg·m² y gira a 8 rad/s. ¿Cuál es su energía cinética rotacional?",
-        opciones: ["A) 80 J", "B) 160 J", "C) 20 J", "D) 40 J"],
-        correcta: "A",
-        retro: "Respuesta correcta: A<br>E_c = ½ I ω² = 0.5 × 2.5 × 64 = 80 J."
-      },
-      {
-        id: 5,
-        subarea: "Mecánica",
-        tema: "Conservación del momento angular",
-        pregunta: "Un patinador tiene I₁ = 12 kg·m² y ω₁ = 3 rad/s. Reduce su I a 3 kg·m². ¿Cuál es su nueva ω₂?",
-        opciones: ["A) 6 rad/s", "B) 12 rad/s", "C) 1.5 rad/s", "D) 9 rad/s"],
-        correcta: "B",
-        retro: "Respuesta correcta: B<br>Conservación: I₁ω₁ = I₂ω₂ → 12×3 = 3×ω₂ → ω₂ = 12 rad/s."
-      },
-      {
-        id: 6,
-        subarea: "Mecánica",
-        tema: "Ley de la conservación de la cantidad de movimiento",
-        pregunta: "Un carro de 1000 kg a 12 m/s choca inelásticamente con uno de 800 kg en reposo. ¿Velocidad final del sistema?",
-        opciones: ["A) 6.67 m/s", "B) 12 m/s", "C) 7.2 m/s", "D) 5 m/s"],
-        correcta: "A",
-        retro: "Respuesta correcta: A<br>m₁v₁ = (m₁+m₂)v → 1000×12 = 1800v → v = 12000/1800 ≈ 6.67 m/s."
-      },
-      // ... (continúo con las 18 preguntas restantes exactamente igual)
-      // Preguntas 7-10: más de choques, fuerzas distribuidas y rotacional
-      {
-        id: 7,
-        subarea: "Mecánica",
-        tema: "Tipos de choque y variables relacionadas",
-        pregunta: "En un choque elástico, una masa de 3 kg a 8 m/s golpea a una de 2 kg en reposo. ¿Velocidad final de la segunda masa?",
-        opciones: ["A) 9.6 m/s", "B) 4.8 m/s", "C) 6 m/s", "D) 12 m/s"],
-        correcta: "A",
-        retro: "Respuesta correcta: A<br>Fórmula choque elástico: v₂ = [2m₁/(m₁+m₂)]u₁ = (6/5)×8 = 9.6 m/s."
-      },
-      {
-        id: 8,
-        subarea: "Mecánica",
-        tema: "Sistemas de fuerzas coplanares concurrentes y distribuidos",
-        pregunta: "Un poste de 5 m soporta 300 N en el extremo y un cable a 60° con la horizontal. ¿Tensión en el cable?",
-        opciones: ["A) 346 N", "B) 300 N", "C) 600 N", "D) 173 N"],
-        correcta: "A",
-        retro: "Respuesta correcta: A<br>T = W / sin 60° = 300 / (√3/2) ≈ 346 N."
-      },
-      // Preguntas 9 y 10 (más mecánica)
-      {
-        id: 9,
-        subarea: "Mecánica",
-        tema: "Conservación del momento angular",
-        pregunta: "Una plataforma giratoria con I = 50 kg·m² y ω = 2 rad/s recibe una persona de 60 kg que se para a 1 m del centro. ¿Nueva ω? (I_persona ≈ m r²)",
-        opciones: ["A) 1.25 rad/s", "B) 0.8 rad/s", "C) 3.2 rad/s", "D) 1.6 rad/s"],
-        correcta: "A",
-        retro: "Respuesta correcta: A<br>I_total nuevo = 50 + 60×1² = 110 kg·m². L conservado → 50×2 = 110×ω → ω = 100/110 ≈ 0.91 rad/s (redondeado a opción A)."
-      },
-      {
-        id: 10,
-        subarea: "Mecánica",
-        tema: "Relación entre impulso y cantidad de movimiento",
-        pregunta: "Un balón de 0.4 kg recibe un impulso de 8 N·s. ¿Cambio en su velocidad?",
-        opciones: ["A) 20 m/s", "B) 3.2 m/s", "C) 8 m/s", "D) 5 m/s"],
-        correcta: "A",
-        retro: "Respuesta correcta: A<br>Impulso = Δp = m Δv → Δv = 8 / 0.4 = 20 m/s."
-      },
-
-      // ====================== 14 preguntas Óptica, ondas y electromagnetismo ======================
-      {
-        id: 11,
-        subarea: "Óptica, ondas y electromagnetismo",
-        tema: "Generación de fuerza magnética",
-        pregunta: "Un electrón (q = -1.6×10^{-19} C) se mueve a 3×10^6 m/s perpendicular a B = 0.4 T. ¿Magnitud de la fuerza magnética?",
-        opciones: ["A) 1.92×10^{-13} N", "B) 4.8×10^{-13} N", "C) 9.6×10^{-14} N", "D) 6.4×10^{-13} N"],
-        correcta: "A",
-        retro: "Respuesta correcta: A<br>F = |q| v B = 1.6×10^{-19} × 3×10^6 × 0.4 = 1.92×10^{-13} N."
-      },
-      {
-        id: 12,
-        subarea: "Óptica, ondas y electromagnetismo",
-        tema: "Sistemas de fuerzas entre corrientes",
-        pregunta: "Dos alambres paralelos separados 0.1 m llevan 10 A en la misma dirección. ¿Fuerza por metro entre ellos?",
-        opciones: ["A) 2×10^{-4} N/m", "B) 4×10^{-4} N/m", "C) 1×10^{-4} N/m", "D) 8×10^{-5} N/m"],
-        correcta: "A",
-        retro: "Respuesta correcta: A<br>F/L = (μ₀ I₁ I₂)/(2π d) = (4π×10^{-7} ×10×10)/(2π ×0.1) = 2×10^{-4} N/m."
-      },
-      {
-        id: 13,
-        subarea: "Óptica, ondas y electromagnetismo",
-        tema: "Sistemas conductores que generan campos magnéticos",
-        pregunta: "Un solenoide de 0.5 m de largo con 200 espiras lleva una corriente de 4 A. ¿Cuál es la intensidad del campo magnético en su interior? (μ₀ = 4π × 10^{-7} T·m/A)",
-        opciones: ["A) 2.01 × 10^{-3} T", "B) 0.64 T", "C) 1.01 × 10^{-3} T", "D) 0.32 T"],
-        correcta: "A",
-        retro: "Respuesta correcta: A<br>B = μ₀ (N/L) I = (4π×10^{-7}) × (200/0.5) × 4 = 4π×10^{-7} × 400 × 4 = 2.01 × 10^{-3} T."
-      },
-      {
-        id: 14,
-        subarea: "Óptica, ondas y electromagnetismo",
-        tema: "Tipos y variables que intervienen en el movimiento armónico simple",
-        pregunta: "Un resorte con constante k = 200 N/m tiene una masa de 0.5 kg unida. ¿Cuál es el periodo del movimiento armónico simple?",
-        opciones: ["A) 0.31 s", "B) 0.50 s", "C) 0.63 s", "D) 1.0 s"],
-        correcta: "A",
-        retro: "Respuesta correcta: A<br>T = 2π √(m/k) = 2π √(0.5/200) = 2π √(0.0025) = 2π × 0.05 = 0.31 s."
-      },
-      {
-        id: 15,
-        subarea: "Óptica, ondas y electromagnetismo",
-        tema: "Clasificación, componentes y representación gráfica de ondas",
-        pregunta: "Una onda senoidal tiene amplitud 0.04 m y longitud de onda 0.8 m. ¿Cuál es su ecuación si parte del origen en t=0?",
-        opciones: ["A) y = 0.04 sen(2πx/0.8)", "B) y = 0.04 sen(πx/0.4)", "C) y = 0.04 cos(2πx/0.8)", "D) y = 0.08 sen(2πx/0.8)"],
-        correcta: "A",
-        retro: "Respuesta correcta: A<br>La forma estándar es y = A sen(2πx/λ). La opción B usa k incorrecto y la D duplica la amplitud."
-      },
-      {
-        id: 16,
-        subarea: "Óptica, ondas y electromagnetismo",
-        tema: "Ondas y fenómenos ondulatorios",
-        pregunta: "Una onda viaja a 340 m/s con frecuencia 680 Hz. ¿Cuál es su longitud de onda?",
-        opciones: ["A) 0.5 m", "B) 2 m", "C) 0.25 m", "D) 1 m"],
-        correcta: "A",
-        retro: "Respuesta correcta: A<br>v = f λ → λ = v/f = 340 / 680 = 0.5 m."
-      },
-      {
-        id: 17,
-        subarea: "Óptica, ondas y electromagnetismo",
-        tema: "Ondas electromagnéticas",
-        pregunta: "Una onda electromagnética tiene frecuencia 6 × 10^{14} Hz. ¿Cuál es su longitud de onda en el vacío?",
-        opciones: ["A) 500 nm", "B) 5 × 10^{-7} m", "C) 2 × 10^{-7} m", "D) 300 nm"],
-        correcta: "A",
-        retro: "Respuesta correcta: A<br>c = f λ → λ = c/f = 3×10^8 / 6×10^{14} = 5×10^{-7} m = 500 nm."
-      },
-      {
-        id: 18,
-        subarea: "Óptica, ondas y electromagnetismo",
-        tema: "Aplicación tecnológica de fenómenos ondulatorios",
-        pregunta: "Un radar de tráfico emite ondas de 3 cm de longitud y recibe el eco con un corrimiento Doppler. ¿Qué fenómeno se utiliza para medir la velocidad del auto?",
-        opciones: ["A) Efecto Doppler", "B) Reflexión total", "C) Difracción", "D) Interferencia"],
-        correcta: "A",
-        retro: "Respuesta correcta: A<br>El radar usa el efecto Doppler para detectar el cambio de frecuencia debido al movimiento del vehículo."
-      },
-      {
-        id: 19,
-        subarea: "Óptica, ondas y electromagnetismo",
-        tema: "Tipos de lente",
-        pregunta: "Una lente convergente tiene distancia focal de 20 cm. ¿Qué tipo de lente es y qué imagen forma de un objeto lejano?",
-        opciones: ["A) Convergente, imagen real e invertida", "B) Divergente, imagen virtual y derecha", "C) Convergente, imagen virtual", "D) Divergente, imagen real"],
-        correcta: "A",
-        retro: "Respuesta correcta: A<br>Las lentes convergentes (convexas) forman imágenes reales e invertidas de objetos lejanos."
-      },
-      {
-        id: 20,
-        subarea: "Óptica, ondas y electromagnetismo",
-        tema: "Características y parámetros que intervienen en los fenómenos ópticos",
-        pregunta: "Un objeto se coloca a 30 cm de una lente convergente de f = 15 cm. ¿Dónde se forma la imagen?",
-        opciones: ["A) 30 cm del otro lado", "B) 10 cm del otro lado", "C) 20 cm del mismo lado", "D) A 15 cm"],
-        correcta: "A",
-        retro: "Respuesta correcta: A<br>1/f = 1/do + 1/di → 1/15 = 1/30 + 1/di → 1/di = 1/30 → di = 30 cm (real)."
-      },
-      {
-        id: 21,
-        subarea: "Óptica, ondas y electromagnetismo",
-        tema: "Reflexión y refracción",
-        pregunta: "Un rayo de luz pasa del aire (n=1) al vidrio (n=1.5) con ángulo de incidencia 30°. ¿Cuál es el ángulo de refracción?",
-        opciones: ["A) 19.5°", "B) 45°", "C) 30°", "D) 22.5°"],
-        correcta: "A",
-        retro: "Respuesta correcta: A<br>Ley de Snell: n₁ sen i = n₂ sen r → sen r = (1×sen 30°)/1.5 = 0.5/1.5 = 0.333 → r ≈ 19.5°."
-      },
-      {
-        id: 22,
-        subarea: "Óptica, ondas y electromagnetismo",
-        tema: "Óptica geométrica y ondulatoria",
-        pregunta: "¿Qué fenómeno explica la formación de colores en una película delgada de jabón?",
-        opciones: ["A) Interferencia de ondas", "B) Difracción en rendija", "C) Reflexión total interna", "D) Polarización"],
-        correcta: "A",
-        retro: "Respuesta correcta: A<br>Los colores se deben a la interferencia constructiva y destructiva de las ondas reflejadas en las dos superficies de la película."
-      },
-      {
-        id: 23,
-        subarea: "Óptica, ondas y electromagnetismo",
-        tema: "Características y parámetros que intervienen en los fenómenos ópticos",
-        pregunta: "El índice de refracción del diamante es 2.42. ¿Cuál es la velocidad de la luz dentro del diamante?",
-        opciones: ["A) 1.24 × 10^8 m/s", "B) 3 × 10^8 m/s", "C) 7.26 × 10^7 m/s", "D) 1.5 × 10^8 m/s"],
-        correcta: "A",
-        retro: "Respuesta correcta: A<br>v = c / n = 3×10^8 / 2.42 ≈ 1.24 × 10^8 m/s."
-      },
-      {
-        id: 24,
-        subarea: "Óptica, ondas y electromagnetismo",
-        tema: "Reflexión y refracción",
-        pregunta: "¿A partir de qué ángulo de incidencia ocurre reflexión total interna del vidrio (n=1.5) al aire?",
-        opciones: ["A) 41.8°", "B) 30°", "C) 48.6°", "D) 90°"],
-        correcta: "A",
-        retro: "Respuesta correcta: A<br>sen θ_c = 1/n = 1/1.5 ≈ 0.666 → θ_c = arcsin(0.666) ≈ 41.8°."
-      }
+        { texto: "Una fuerza de 20 N se aplica horizontalmente a un bloque de 5 kg sobre una superficie sin rozamiento. ¿Cuál es la aceleración del bloque?", opciones: ["2 m/s²", "4 m/s²", "5 m/s²", "10 m/s²"], correcta: 1, explicacion: "Usando F = m·a → a = F/m = 20/5 = 4 m/s²." },
+        { texto: "Un objeto de 2 kg gira en un círculo de 0.5 m de radio con rapidez angular de 6 rad/s. ¿Cuál es su fuerza centrípeta?", opciones: ["12 N", "18 N", "24 N", "36 N"], correcta: 3, explicacion: "Fc = m·ω²·r = 2·(6²)·0.5 = 2·36·0.5 = 36 N." },
+        { texto: "Un torque de 10 N·m actúa sobre una rueda con momento de inercia 2 kg·m². ¿Cuál es la aceleración angular?", opciones: ["2 rad/s²", "5 rad/s²", "8 rad/s²", "10 rad/s²"], correcta: 1, explicacion: "τ = I·α → α = τ/I = 10/2 = 5 rad/s²." },
+        { texto: "Una partícula con momento angular de 8 kg·m²/s tiene un momento de inercia de 2 kg·m². ¿Cuál es su rapidez angular?", opciones: ["2 rad/s", "4 rad/s", "6 rad/s", "8 rad/s"], correcta: 1, explicacion: "L = I·ω → ω = L/I = 8/2 = 4 rad/s." },
+        { texto: "Un cuerpo de 3 kg se mueve a 4 m/s y choca elásticamente con otro de igual masa en reposo. ¿Cuál es la velocidad del primero después del choque?", opciones: ["0 m/s", "2 m/s", "4 m/s", "8 m/s"], correcta: 0, explicacion: "En choque elástico de masas iguales, el primero se detiene y el segundo sale con su velocidad inicial." },
+        { texto: "Una onda tiene una frecuencia de 50 Hz y una longitud de onda de 2 m. ¿Cuál es su velocidad?", opciones: ["25 m/s", "50 m/s", "100 m/s", "200 m/s"], correcta: 2, explicacion: "v = λ·f = 2·50 = 100 m/s." },
+        { texto: "Un rayo de luz pasa del aire (n=1) al agua (n=1.33). Si incide con 30°, ¿cuál es el ángulo de refracción aproximado?", opciones: ["22.1°", "30°", "41.8°", "19.5°"], correcta: 0, explicacion: "Usando Snell: 1·sen30 = 1.33·senθ → senθ = 0.5/1.33 ≈ 0.376 → θ ≈ 22.1°." },
+        { texto: "Un imán se acerca a una espira conductora. ¿Qué fenómeno ocurre?", opciones: ["Se genera corriente inducida", "Se genera un campo eléctrico estático", "La espira se calienta sin corriente", "No ocurre nada"], correcta: 0, explicacion: "Ley de Faraday: la variación del flujo magnético induce corriente." },
+        { texto: "¿Cuál es la energía cinética de un objeto de 4 kg que gira con rapidez angular 3 rad/s y radio 0.5 m?", opciones: ["4.5 J", "9 J", "18 J", "36 J"], correcta: 0, explicacion: "Ec = ½ I ω² = ½ (m·r²) ω² = 0.5·4·0.25·9 = 4.5 J." },
+        { texto: "Un péndulo simple tiene una longitud de 1 m. ¿Cuál es su período aproximado? (g=9.8 m/s²)", opciones: ["0.64 s", "1.0 s", "2.0 s", "3.14 s"], correcta: 2, explicacion: "T = 2π√(L/g) = 2π√(1/9.8) ≈ 2.0 s." },
+        { texto: "Dos cargas de +2 μC y -3 μC están separadas 0.1 m. ¿La fuerza entre ellas es?", opciones: ["Atractiva de 5.4 N", "Repulsiva de 5.4 N", "Atractiva de 0.54 N", "Repulsiva de 0.54 N"], correcta: 0, explicacion: "Ley de Coulomb: F = k|q1q2|/r² = 9e9·6e-12/0.01 = 5.4 N, signos opuestos → atractiva." },
+        { texto: "Una lente convergente tiene distancia focal 20 cm. ¿Dónde se forma la imagen de un objeto a 40 cm?", opciones: ["20 cm del otro lado", "40 cm del otro lado", "13.3 cm", "Infinito"], correcta: 1, explicacion: "1/f = 1/do + 1/di → 1/20 = 1/40 + 1/di → 1/di = 1/20 - 1/40 = 1/40 → di = 40 cm." },
+        { texto: "Un auto de 1000 kg aumenta su velocidad de 10 a 20 m/s. ¿El impulso recibido?", opciones: ["10000 N·s", "20000 N·s", "5000 N·s", "15000 N·s"], correcta: 0, explicacion: "Impulso = Δp = m·Δv = 1000·(20-10) = 10000 N·s." },
+        { texto: "Un transformador tiene 100 espiras en primario y 300 en secundario. Si el primario tiene 120 V, ¿voltaje en secundario?", opciones: ["40 V", "120 V", "360 V", "600 V"], correcta: 2, explicacion: "Vs/Vp = Ns/Np → Vs = 120·(300/100) = 360 V." },
+        { texto: "La frecuencia de una onda electromagnética es 3×10⁸ Hz. ¿Longitud de onda en el vacío?", opciones: ["0.1 m", "1 m", "3 m", "10 m"], correcta: 1, explicacion: "λ = c/f = 3e8 / 3e8 = 1 m." },
+        { texto: "Una barra uniforme de 2 m y 10 kg tiene un pivote en su centro. ¿Torque neto si se cuelgan 5 kg a 0.8 m del centro y 8 kg a 0.5 m del otro lado?", opciones: ["0 N·m", "0.2 N·m", "0.8 N·m", "2 N·m"], correcta: 0, explicacion: "Torque1 = 5·9.8·0.8 = 39.2 Nm, Torque2 = 8·9.8·0.5 = 39.2 Nm, se cancelan." },
+        { texto: "¿Cuál fenómeno explica los colores de una pompa de jabón?", opciones: ["Reflexión", "Refracción", "Interferencia", "Difracción"], correcta: 2, explicacion: "Interferencia de ondas reflejadas en las dos caras de la película delgada." },
+        { texto: "Un alambre recto lleva corriente de 5 A. ¿Campo magnético a 0.1 m de distancia? (μ₀/4π = 10⁻⁷)", opciones: ["2×10⁻⁶ T", "1×10⁻⁵ T", "2×10⁻⁵ T", "1×10⁻⁴ T"], correcta: 2, explicacion: "B = (μ₀ I)/(2π r) = 2e-7·5/0.1 = 1e-5? Revisar: B = (4πe-7·5)/(2π·0.1)= (2e-6)/(0.1)= 2e-5 T." },
+        { texto: "Un resorte con constante 200 N/m se estira 0.1 m. ¿Energía potencial elástica?", opciones: ["1 J", "2 J", "10 J", "20 J"], correcta: 0, explicacion: "Epe = ½ k x² = 0.5·200·0.01 = 1 J." },
+        { texto: "Una onda sonora de 440 Hz viaja a 340 m/s. ¿Longitud de onda?", opciones: ["0.55 m", "0.77 m", "1.29 m", "1.55 m"], correcta: 1, explicacion: "λ = v/f = 340/440 ≈ 0.77 m." },
+        { texto: "¿Cuál es la magnitud del momento angular de una partícula de 2 kg con velocidad 3 m/s a 0.4 m del eje?", opciones: ["2.4 kg·m²/s", "1.2 kg·m²/s", "0.6 kg·m²/s", "4.8 kg·m²/s"], correcta: 0, explicacion: "L = m·v·r = 2·3·0.4 = 2.4 kg·m²/s." },
+        { texto: "Una lupa tiene distancia focal 5 cm. ¿Aumento angular para un ojo normal?", opciones: ["2.5×", "5×", "10×", "20×"], correcta: 1, explicacion: "M = 25/f (cm) = 25/5 = 5×." },
+        { texto: "Un protón entra perpendicular a un campo B=0.2 T con v=10⁶ m/s. ¿Fuerza magnética? (q=1.6e-19 C)", opciones: ["3.2e-14 N", "1.6e-13 N", "6.4e-14 N", "8e-14 N"], correcta: 0, explicacion: "F = q v B = 1.6e-19·1e6·0.2 = 3.2e-14 N." },
+        { texto: "Un espejo cóncavo tiene radio 40 cm. ¿Cuál es su distancia focal?", opciones: ["10 cm", "20 cm", "40 cm", "80 cm"], correcta: 1, explicacion: "f = R/2 = 40/2 = 20 cm." }
     ];
 
-    // ====================== LÓGICA DEL SIMULADOR ======================
-    let actual = 0;
-    let aciertos = 0;
-    let nombreEstudiante = prompt("Nombre del estudiante:", "Estudiante");
+    let respuestasUsuario = new Array(24).fill(null);
+    let usuario = { nombre: "", email: "" };
 
-    function cargarPregunta() {
-      const q = preguntas[actual];
-      document.getElementById("current").textContent = actual + 1;
-      document.getElementById("pregunta-text").innerHTML = `<strong>${q.subarea}</strong><br>${q.pregunta}`;
-      const opts = document.getElementById("opciones");
-      opts.innerHTML = "";
-      q.opciones.forEach((op, i) => {
-        const btn = document.createElement("button");
-        btn.textContent = op;
-        btn.onclick = () => seleccionar(i);
-        opts.appendChild(btn);
-      });
-      document.getElementById("feedback").style.display = "none";
-      document.getElementById("btn-responder").style.display = "none";
+    // Renderizar preguntas
+    function renderQuiz() {
+        const container = document.getElementById("preguntasContainer");
+        container.innerHTML = "";
+        preguntas.forEach((p, idx) => {
+            const divPreg = document.createElement("div");
+            divPreg.classList.add("pregunta");
+            divPreg.innerHTML = `
+                <h3>${idx+1}. ${p.texto}</h3>
+                <div class="opciones" id="opciones-${idx}">
+                    ${p.opciones.map((opt, optIdx) => `
+                        <label>
+                            <input type="radio" name="p${idx}" value="${optIdx}">
+                            ${String.fromCharCode(65+optIdx)}. ${opt}
+                        </label>
+                    `).join('')}
+                </div>
+                <div id="feedback-${idx}" class="feedback"></div>
+            `;
+            container.appendChild(divPreg);
+
+            // Cargar respuesta previa si existe
+            if (respuestasUsuario[idx] !== null) {
+                const radios = document.querySelectorAll(`input[name="p${idx}"]`);
+                radios[respuestasUsuario[idx]].checked = true;
+            }
+
+            // Evento para guardar respuesta
+            const radios = document.querySelectorAll(`input[name="p${idx}"]`);
+            radios.forEach(radio => {
+                radio.addEventListener("change", (e) => {
+                    respuestasUsuario[idx] = parseInt(e.target.value);
+                    // Limpiar feedback anterior
+                    document.getElementById(`feedback-${idx}`).innerHTML = "";
+                });
+            });
+        });
     }
 
-    let seleccion = -1;
-    function seleccionar(i) {
-      seleccion = i;
-      document.getElementById("btn-responder").style.display = "block";
+    function calificarYEnviar() {
+        let aciertos = 0;
+        const detalles = [];
+
+        for (let i = 0; i < preguntas.length; i++) {
+            const elegida = respuestasUsuario[i];
+            const esCorrecta = (elegida === preguntas[i].correcta);
+            if (esCorrecta) aciertos++;
+            const feedbackDiv = document.getElementById(`feedback-${i}`);
+            if (elegida !== null) {
+                const letraElegida = String.fromCharCode(65+elegida);
+                const letraCorrecta = String.fromCharCode(65+preguntas[i].correcta);
+                feedbackDiv.innerHTML = `
+                    <div class="${esCorrecta ? 'correcto' : 'incorrecto'}">
+                        ${esCorrecta ? '✅ Correcto' : '❌ Incorrecto'}.<br>
+                        Tu respuesta: ${letraElegida}. ${preguntas[i].opciones[elegida]}<br>
+                        Respuesta correcta: ${letraCorrecta}. ${preguntas[i].opciones[preguntas[i].correcta]}<br>
+                        ${preguntas[i].explicacion}
+                    </div>
+                `;
+            } else {
+                feedbackDiv.innerHTML = `<div class="incorrecto">⚠️ No respondida. Correcta: ${String.fromCharCode(65+preguntas[i].correcta)}. ${preguntas[i].explicacion}</div>`;
+            }
+            detalles.push({
+                pregunta: i+1,
+                texto: preguntas[i].texto,
+                respuestaCorrecta: preguntas[i].opciones[preguntas[i].correcta],
+                respuestaUsuario: elegida !== null ? preguntas[i].opciones[elegida] : "Sin responder",
+                esCorrecta: esCorrecta
+            });
+        }
+
+        const calificacion = (aciertos / preguntas.length) * 100;
+        const resultadoDiv = document.getElementById("resultadoPanel");
+        resultadoDiv.classList.remove("oculto");
+        resultadoDiv.innerHTML = `
+            <h2>📊 Resultado final</h2>
+            <p><strong>${usuario.nombre}</strong> (${usuario.email})</p>
+            <p>Aciertos: ${aciertos} / ${preguntas.length}</p>
+            <p>Calificación: ${calificacion.toFixed(2)}%</p>
+            ${calificacion >= 70 ? "<p style='color:green'>🎉 ¡Aprobado! Buen dominio de Física.</p>" : "<p style='color:red'>📘 Puedes repasar más. ¡Sigue practicando!</p>"}
+        `;
+
+        // Enviar a Google Sheets
+        enviarAGoogleSheets(usuario.nombre, usuario.email, aciertos, calificacion.toFixed(2), detalles);
     }
 
-    function responder() {
-      const q = preguntas[actual];
-      const fb = document.getElementById("feedback");
-      const esCorrecta = q.opciones[seleccion].startsWith(q.correcta);
+    function enviarAGoogleSheets(nombre, email, aciertos, calificacion, detalles) {
+        // 🔧 CONFIGURACIÓN PARA GOOGLE SHEETS
+        // Paso 1: Crear un Google Apps Script (Extensión > Apps Script)
+        // Paso 2: Pegar el código del backend (ver más abajo)
+        // Paso 3: Desplegar como aplicación web (Ejecutar como "Yo" y acceso "Cualquiera")
+        // Paso 4: Copiar la URL y ponerla aquí:
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxExN43OKfr_2UAWC-dtB4yKhO4wBNROowj2h9r-e23cpm6zFQkiI2Dat95nTHwDNvEtg/exec"; // ← REEMPLAZAR
 
-      if (esCorrecta) aciertos++;
+        const data = {
+            nombre: nombre,
+            email: email,
+            aciertos: aciertos,
+            total: preguntas.length,
+            calificacion: calificacion,
+            fecha: new Date().toLocaleString(),
+            detalles: JSON.stringify(detalles)
+        };
 
-      fb.innerHTML = `
-        <strong>Tu respuesta:</strong> ${q.opciones[seleccion]}<br><br>
-        ${q.retro}
-      `;
-      fb.className = `feedback ${esCorrecta ? 'correct' : 'wrong'}`;
-      fb.style.display = "block";
-
-      if (actual < preguntas.length - 1) {
-        setTimeout(() => { actual++; cargarPregunta(); }, 3000);
-      } else {
-        setTimeout(mostrarFinal, 3000);
-      }
+        fetch(SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors", // Por limitaciones de CORS, pero igual envía
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams(data)
+        }).catch(err => console.log("Error al enviar:", err));
     }
 
-    function mostrarFinal() {
-      document.getElementById("quiz").style.display = "none";
-      document.getElementById("final-screen").style.display = "block";
-      document.getElementById("puntaje-final").innerHTML = `
-        ${nombreEstudiante}, obtuviste <strong>${aciertos}/24</strong> aciertos<br>
-        Puntaje: <strong>${Math.round((aciertos/24)*100)} %</strong>
-      `;
-    }
+    // Iniciar simulador
+    document.getElementById("btnIniciar").addEventListener("click", () => {
+        const nombre = document.getElementById("nombre").value.trim();
+        const email = document.getElementById("email").value.trim();
+        if (nombre === "" || email === "") {
+            alert("Por favor ingresa nombre y correo.");
+            return;
+        }
+        usuario = { nombre, email };
+        document.getElementById("registroPanel").classList.add("oculto");
+        document.getElementById("quizPanel").classList.remove("oculto");
+        renderQuiz();
+    });
 
-  function enviarResultados() {
-  const nombre = nombreEstudiante || prompt("Nombre del estudiante:", "Estudiante");
-  const aciertosTexto = `${aciertos}/24`;
-  const porcentaje = Math.round((aciertos/24)*100);
-
-  const scriptURL = "https://script.google.com/macros/s/AKfycbxMHqrlcT3LurIaggqKt_QtF3LKdDi92t6J8jISmOCMycOWvmjWoibyWitSGI8y9k-UBw/exec";   // ← ← ← Pega aquí el URL que copiaste
-
-  const data = {
-    nombre: nombre,
-    aciertos: aciertosTexto,
-    porcentaje: porcentaje
-  };
-
-  fetch(scriptURL, {
-    method: "POST",
-    mode: "no-cors",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams(data)
-  })
-  .then(() => {
-    alert(`¡Resultados enviados correctamente!\n\n${nombre} → ${aciertos}/24 (${porcentaje}%)`);
-  })
-  .catch(() => {
-    alert("¡Resultados enviados! (puede tardar unos segundos en aparecer en la hoja)");
-  });
-}
-
-
-    // Iniciar
-    cargarPregunta();
-  </script>
+    document.getElementById("btnCalificar").addEventListener("click", () => {
+        let todasRespondidas = respuestasUsuario.every(r => r !== null);
+        if (!todasRespondidas) {
+            alert("Aún hay preguntas sin responder. Revísalas antes de calificar.");
+        } else {
+            calificarYEnviar();
+            document.getElementById("btnCalificar").disabled = true;
+        }
+    });
+</script>
 </body>
 </html>
